@@ -1,6 +1,8 @@
 #ifndef PHOBOS2390_TRAIN_GAME_MAP_H
 #define PHOBOS2390_TRAIN_GAME_MAP_H
 
+#include <memory>
+
 namespace train_game
 {
 
@@ -11,7 +13,7 @@ public:
 	virtual ~Map();
 private:
 	struct Impl;
-	Impl* m_p_impl;
+	std::unique_ptr<Impl> m_p_impl;
 };
 
 }
