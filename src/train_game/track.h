@@ -17,6 +17,12 @@ enum track_type
     track_type_bidirectional
 };
 
+struct glm_line2
+{
+    glm::vec2 m_start;
+    glm::vec2 m_end;
+};
+
 class track
 {
 public:
@@ -25,6 +31,9 @@ public:
     
     /// Creates a new track with points list and track type
     track(std::vector<glm::vec2>& points, track_type type);
+    
+    /// copy constructor
+    track(const track& other);
 
     /// Removes class value
     virtual ~track();
@@ -33,7 +42,7 @@ public:
     
     void render(SDL_Renderer* p_renderer);
     
-    
+    bool intersect_split(glm_line2& line, std::vector<track>& other_tracks);
     
 private:
     struct Impl;

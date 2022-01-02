@@ -40,6 +40,9 @@ target_link_libraries(line_segment_demo game_library ${SDL2_LIBRARIES} ${SDL2_IM
 add_executable(intersection_demo ${SRC_ROOT_DIR}/executable/intersection_demo.cpp)
 target_link_libraries(intersection_demo game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
 
+add_executable(segment_drawing ${SRC_ROOT_DIR}/executable/segment_drawing.cpp)
+target_link_libraries(segment_drawing game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
+
 file(GLOB library_test_files ${SRC_ROOT_DIR}/test/*.c*)
 add_executable(library_tests ${library_test_files})
 target_link_libraries(library_tests game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
