@@ -1,0 +1,130 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/TrackData",
+    "definitions": {
+        "TrackData": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Point"
+                    }
+                },
+                "tracks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Track"
+                    }
+                },
+                "junctions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Junction"
+                    }
+                },
+                "colors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Color"
+                    }
+                },
+                "version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "colors",
+                "junctions",
+                "points",
+                "tracks",
+                "version"
+            ],
+            "title": "TrackData"
+        },
+        "Color": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "red": {
+                    "type": "integer"
+                },
+                "green": {
+                    "type": "integer"
+                },
+                "blue": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "blue",
+                "green",
+                "id",
+                "red"
+            ],
+            "title": "Color"
+        },
+        "Junction": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "parent": {
+                    "type": "integer"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "selected": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "children",
+                "parent",
+                "selected"
+            ],
+            "title": "Junction"
+        },
+        "Point": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "x",
+                "y"
+            ],
+            "title": "Point"
+        },
+        "Track": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "points": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "required": [
+                "points"
+            ],
+            "title": "Track"
+        }
+    }
+}
+

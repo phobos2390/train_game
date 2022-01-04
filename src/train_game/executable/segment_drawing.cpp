@@ -65,14 +65,21 @@ int main(int argc, char** argv)
                     }
                     else if(event.type == SDL_MOUSEBUTTONDOWN)
                     {
-                        printf("Mouse button down: %d, %d\n", event.button.x, event.button.y);
-                        current_x = event.button.x;
-                        current_y = event.button.y;
-                        if(!drawing_line_segment)
+                        if(event.button.button == 1)
                         {
-                            start_x = current_x;
-                            start_y = current_y;
+                            current_x = event.button.x;
+                            current_y = event.button.y;
+                            if(!drawing_line_segment)
+                            {
+                                start_x = current_x;
+                                start_y = current_y;
+                            }
                         }
+                        else if(event.button.button == 3)
+                        {
+                            drawing_line_segment = false;
+                        }
+                        printf("Mouse button down: %d, %d, %d\n", event.button.button, event.button.x, event.button.y);
                         printf("%d,%d,%d\n", event.button.clicks, drawing_line_segment, pressed_state);
                     }
                     else if(event.type == SDL_MOUSEMOTION)
@@ -92,29 +99,32 @@ int main(int argc, char** argv)
                     }
                     else if(event.type == SDL_MOUSEBUTTONUP)
                     {
-                        if((current_x == event.button.x)&&(current_y == event.button.y))
+                        if(event.button.button == 1)
                         {
-                            printf("Mouse unmoved: %d, %d, %d\n", event.button.clicks, event.button.x, event.button.y);
-                            if(drawing_line_segment)
+                            if((current_x == event.button.x)&&(current_y == event.button.y))
                             {
-                                draw_x = event.button.x;
-                                draw_y = event.button.y;
-                                printf("Click Line: (%d,%d) (%d,%d)\n", start_x, start_y, event.button.x, event.button.y);
+                                printf("Mouse unmoved: %d, %d, %d\n", event.button.clicks, event.button.x, event.button.y);
+                                if(drawing_line_segment)
+                                {
+                                    draw_x = event.button.x;
+                                    draw_y = event.button.y;
+                                    printf("Click Line: (%d,%d) (%d,%d)\n", start_x, start_y, event.button.x, event.button.y);
+                                    line_segments.emplace_back(glm::vec2(start_x, start_y), glm::vec2(event.button.x, event.button.y));
+                                }
+                                else
+                                {
+                                    printf("Starting Line \n");
+                                }
+                                drawing_line_segment = !drawing_line_segment;
+                            }
+                            else 
+                            {
+                                printf("Drag Line: (%d,%d) (%d,%d)\n", start_x, start_y, event.button.x, event.button.y);
                                 line_segments.emplace_back(glm::vec2(start_x, start_y), glm::vec2(event.button.x, event.button.y));
+                                drawing_line_segment = false;
                             }
-                            else
-                            {
-                                printf("Starting Line \n");
-                            }
-                            drawing_line_segment = !drawing_line_segment;
+                            printf("%d,%d,%d\n", event.button.clicks, drawing_line_segment, pressed_state);
                         }
-                        else 
-                        {
-                            printf("Drag Line: (%d,%d) (%d,%d)\n", start_x, start_y, event.button.x, event.button.y);
-                            line_segments.emplace_back(glm::vec2(start_x, start_y), glm::vec2(event.button.x, event.button.y));
-                            drawing_line_segment = false;
-                        }
-                        printf("%d,%d,%d\n", event.button.clicks, drawing_line_segment, pressed_state);
 //                        drawing_line_segment = true;
 //                        pressed_state = true;
                     }
@@ -196,7 +206,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        std::cout << "Usage: ./demo '(1,2)' '(2,1)' '1.0' \n";
+        std::cout << "Usage: ./segment_drawing \n";
     }
     return 0;
 }

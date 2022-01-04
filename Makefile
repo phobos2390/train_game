@@ -22,6 +22,9 @@ intersection_demo: build
 	build/intersection_demo '(20,20)' '(400,400)' '(300,0)'
 	build/intersection_demo '(400,20)' '(20,400)' '(300,0)'
 	build/intersection_demo '(400,20)' '(20,400)' '(100,400)'
+	
+loading_test: build
+	build/loading_test res/sample_track_data.json
 
 clean: 
 	rm -rf build

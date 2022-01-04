@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     }
     else
     {
-        std::cout << "Usage: ./demo '(1,2)' '(2,1)' '1.0' \n";
+        std::cout << "Usage: ./line_segment_demo '(1,2)' '(2,1)' '(3,1)' \n";
     }
     return 0;
 }
