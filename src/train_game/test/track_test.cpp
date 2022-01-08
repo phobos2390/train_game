@@ -3,6 +3,7 @@
 #include <train_game/track.h>
 #include <catch2/catch.hpp>
 #include <train_game/track.h> // Testing include guard
+#include <train_game/SDLRender_view.h>
 
 using namespace train_game;
 
@@ -45,6 +46,8 @@ TEST_CASE("render_test", "basic_track_render_test")
 
     SDL_SetRenderDrawColor(p_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     
+    SDLRender_view view(p_renderer);
+    
     glm::vec2 start (25, 25);
     
     track t;
@@ -54,7 +57,7 @@ TEST_CASE("render_test", "basic_track_render_test")
     t.add_point(glm::vec2(45,60));
     t.add_point(glm::vec2(40,70));
     
-    t.render(p_renderer);
+    t.render(view);
     
     SDL_RenderPresent(p_renderer);
     IMG_SavePNG(p_surface, "test_files/basic_track_render_test.png");
@@ -96,6 +99,7 @@ TEST_CASE("render_test.basic_track_split_test", "render_test.basic_track_split_t
     SDL_SetRenderDrawColor(p_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(p_renderer);
 
+    SDLRender_view view(p_renderer);
     
     glm::vec2 start (25, 25);
     
@@ -114,7 +118,7 @@ TEST_CASE("render_test.basic_track_split_test", "render_test.basic_track_split_t
     
     SDL_SetRenderDrawColor(p_renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
 
-    t.render(p_renderer);
+    t.render(view);
     REQUIRE(others.size() == 1);
     
     uint8_t rgb [][3] = {{255,0,255},{0,255,255}};
@@ -123,11 +127,11 @@ TEST_CASE("render_test.basic_track_split_test", "render_test.basic_track_split_t
     
     std::for_each(others.begin()
                  ,others.end()
-                 ,[&p_renderer,s_rgb,&i,rgb](track& subtrack)
+                 ,[&view,&p_renderer,s_rgb,&i,rgb](track& subtrack)
     {
         SDL_SetRenderDrawColor(p_renderer, rgb[i][0], rgb[i][1], rgb[i][2], SDL_ALPHA_OPAQUE);
         i = (i + 1) % s_rgb;
-        subtrack.render(p_renderer);
+        subtrack.render(view);
     });
     
     SDL_SetRenderDrawColor(p_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
@@ -174,6 +178,8 @@ TEST_CASE("render_test.complex_split_test", "render_test.complex_split_test")
     SDL_SetRenderDrawColor(p_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(p_renderer);
     
+    SDLRender_view view(p_renderer);
+    
     glm::vec2 start (25, 25);
     
     track t;
@@ -198,7 +204,7 @@ TEST_CASE("render_test.complex_split_test", "render_test.complex_split_test")
     
     SDL_SetRenderDrawColor(p_renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
 
-    t.render(p_renderer);
+    t.render(view);
     REQUIRE(others.size() >= 1);
     
     uint8_t rgb [][3] = {{255,0,255},{0,255,255},{0,255,0},{255,255,0},{255,0,0},{255,128,128},{0,0,255}};
@@ -207,11 +213,11 @@ TEST_CASE("render_test.complex_split_test", "render_test.complex_split_test")
     
     std::for_each(others.begin()
                  ,others.end()
-                 ,[&p_renderer,s_rgb,&i,rgb](track& subtrack)
+                 ,[&view,&p_renderer,s_rgb,&i,rgb](track& subtrack)
     {
         SDL_SetRenderDrawColor(p_renderer, rgb[i][0], rgb[i][1], rgb[i][2], SDL_ALPHA_OPAQUE);
         i = (i + 1) % s_rgb;
-        subtrack.render(p_renderer);
+        subtrack.render(view);
     });
     
     SDL_SetRenderDrawColor(p_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);

@@ -15,6 +15,7 @@ set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_C_FLAGS "-g -m64")
 set(CMAKE_CXX_FLAGS "-g -m64 -Wa,-mbig-obj -std=c++17")
 
+find_package(OpenGL REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 include_directories(${INC_ROOT_DIR} 
@@ -34,16 +35,16 @@ endforeach()
 
 message("Building source files ${source_files}")
 add_library(game_library SHARED ${source_files})
-target_link_libraries(game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
+target_link_libraries(game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${OPENGL_LIBRARIES})
 
 file(GLOB executable_files ${SRC_ROOT_DIR}/executable/*.c*)
 foreach(executable_file ${executable_files})
     get_filename_component(exe_name ${executable_file} NAME_WE)
     add_executable(${exe_name} ${executable_file})
     message("Building executable ${exe_name}")
-    target_link_libraries(${exe_name} game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
+    target_link_libraries(${exe_name} game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${OPENGL_LIBRARIES})
 endforeach()
 
 file(GLOB library_test_files ${SRC_ROOT_DIR}/test/*.c*)
 add_executable(library_tests ${library_test_files})
-target_link_libraries(library_tests game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
+target_link_libraries(library_tests game_library ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${OPENGL_LIBRARIES})

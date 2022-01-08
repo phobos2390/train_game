@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_image.h>
+#include <train_game/I_view.h>
 
 namespace train_game
 {
@@ -40,7 +41,7 @@ public:
     
     void add_point(glm::vec2 point);
     
-    void render(SDL_Renderer* p_renderer);
+    void render(train_game::I_view& view);
     
     bool intersect_split(glm_line2& line, std::vector<track>& other_tracks);
     

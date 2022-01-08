@@ -53,18 +53,18 @@ void track::add_point(glm::vec2 point)
     m_p_impl->m_points.push_back(point);
 }
 
-void track::render(SDL_Renderer* p_renderer)
+void track::render(train_game::I_view& view)
 {
     if(m_p_impl->m_points.size() > 0)
     {
         glm::vec2 prev = m_p_impl->m_points.front();
         std::for_each(m_p_impl->m_points.begin()
                      ,m_p_impl->m_points.end()
-                     ,[&prev, p_renderer](glm::vec2& new_point)
+                     ,[&prev, &view](glm::vec2& new_point)
         {
             if((prev.x != new_point.x) || (prev.y != new_point.y))
             {
-                SDL_RenderDrawLine(p_renderer, prev.x, prev.y, new_point.x, new_point.y);
+                view.render_line(prev,new_point);
             }
             prev = new_point;
         });
