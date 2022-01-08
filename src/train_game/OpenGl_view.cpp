@@ -112,12 +112,12 @@ void OpenGl_view::per_frame_init()
             GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     glLoadIdentity();
-    glScalef(2.0f/(m_p_impl->m_scale*m_p_impl->m_width),2.0f/-(m_p_impl->m_scale*m_p_impl->m_height),1.0);
-//    glScalef(2.0f/(m_p_impl->m_width),2.0f/-(m_p_impl->m_height),1.0);
+//    glScalef(2.0f/(m_p_impl->m_scale*m_p_impl->m_width),2.0f/-(m_p_impl->m_scale*m_p_impl->m_height),1.0);
+    glScalef(2.0f/(m_p_impl->m_width),2.0f/-(m_p_impl->m_height),1.0);
 //    glScalef(m_p_impl->m_scale*2.0f/(m_p_impl->m_width),m_p_impl->m_scale*2.0f/-(m_p_impl->m_height),1.0);
-    glTranslatef(-(m_p_impl->m_scale*m_p_impl->m_width)/2.0,-(m_p_impl->m_scale*m_p_impl->m_height)/2.0,0);
+//    glTranslatef(-(m_p_impl->m_scale*m_p_impl->m_width)/2.0,-(m_p_impl->m_scale*m_p_impl->m_height)/2.0,0);
 //    glScalef(2.0f/(m_p_impl->m_width),2.0f/-(m_p_impl->m_height),1.0);
-//    glTranslatef(-(m_p_impl->m_width)/2.0,-(m_p_impl->m_height)/2.0,0);
+    glTranslatef(-(m_p_impl->m_width)/2.0,-(m_p_impl->m_height)/2.0,0);
 //    glTranslatef(-(m_p_impl->m_width)/(m_p_impl->m_scale*2.0),-(m_p_impl->m_height)/(m_p_impl->m_scale*2.0),0);
 }
 

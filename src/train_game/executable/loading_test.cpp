@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 #include <train_game/line_utils.h>
+#include <train_game/OpenGl_view.h>
 #include <track_data.h>
 #include <fstream>
 #include <vector>
@@ -77,12 +78,12 @@ void render_arc(float angle_semicircle, float semicircle_start, uint32_t segment
 
 int main(int argc, char** argv) 
 { 
-    SDL_Window * p_window = NULL;
-    //SDL_Renderer * p_renderer = NULL;
+//    SDL_Window * p_window = NULL;
+//    //SDL_Renderer * p_renderer = NULL;
     int32_t error = 0;
-    
-    float height = 500;
-    float width = 500;
+//    
+//    float height = 500;
+//    float width = 500;
     
     float scale = 2.0;
     
@@ -97,24 +98,13 @@ int main(int argc, char** argv)
         }
         else
         {
-            error = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER);
-        }
-    
-        if(error == 0)
-        {
-            p_window = SDL_CreateWindow( "Loading test"
-                                       , SDL_WINDOWPOS_UNDEFINED
-                                       , SDL_WINDOWPOS_UNDEFINED
-                                       , height * scale
-                                       , width * scale
-                                       , SDL_WINDOW_OPENGL);
-
-            SDL_GLContext glcontext = SDL_GL_CreateContext(p_window);
-
-            glClearColor(0,0,0,1);
-            glClear(GL_COLOR_BUFFER_BIT);
-            SDL_GL_SwapWindow(p_window);
             
+        }
+        
+        train_game::OpenGl_view view("Loading test");
+
+        if(view.get_error() == 0)
+        {
             SDL_Event event;
             event.type = 0;
             
@@ -131,21 +121,10 @@ int main(int argc, char** argv)
                 nlohmann::from_json(j, track_data);
                 std::for_each(track_data.get_colors().begin()
                              ,track_data.get_colors().end()
-                             ,[&colormap](const track::color& c)
+                             ,[&view,&colormap](const track::color& c)
                 {
-                    if(colormap.find(c.get_id()) == colormap.end())
-                    {
-                        colormap.emplace(c.get_id(), c);
-                    }
+                    view.set_color(c.get_id(),c.get_red(),c.get_green(),c.get_blue());
                 });
-                if(colormap.find("default") == colormap.end())
-                {
-                    track::color c;
-                    c.set_red(255);
-                    c.set_green(255);
-                    c.set_blue(255);
-                    colormap.emplace("default", c);
-                }
             }
             catch(std::exception& e)
             {
@@ -158,7 +137,7 @@ int main(int argc, char** argv)
                 SDL_Log("Exception loading track data");
                 continuing = false;
             }
-            
+
             while(continuing)
             {
                 while(SDL_PollEvent(&event)) 
@@ -170,85 +149,43 @@ int main(int argc, char** argv)
                     }
                 }
                 
-                glClearColor(0,0,0,1);
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-                        GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-                glLoadIdentity();
-                glScalef(2.0f/width,2.0f/-height,1.0);
-                glTranslatef(-width/2.0,-height/2.0,0);
+                view.per_frame_init();
                 
                 // render data
-                
-                track::color track_color;
-                if(colormap.find("tracks") != colormap.end())
-                {
-                    track_color = colormap["tracks"];
-                }
-                else
-                {
-                    track_color = colormap["default"];
-                }
-                
 
                 std::for_each(track_data.get_tracks().begin()
                              ,track_data.get_tracks().end()
-                             ,[scale, track_color,track_data](const track::track& t)
+                             ,[&view, scale, track_data](const track::track& t)
                 {
                     track::point previous = track_data.get_points()[t.get_points().front()];
                     std::for_each( t.get_points().begin()
                                  , t.get_points().end()
-                                 , [scale, track_color,track_data,&previous](const uint64_t& index)
+                                 , [&view, scale, track_data,&previous](const uint64_t& index)
                     {
                         track::point current = track_data.get_points()[index];
-                        glLineWidth(2.5*scale);
-                        glBegin(GL_LINES);
-                        glColor3ub(track_color.get_red(), track_color.get_green(), track_color.get_blue());
-                        glVertex2f(previous.get_x(),previous.get_y());
-                        glVertex2f(current.get_x(),current.get_y());
-                        glEnd();
+                        view.set_color("tracks");
+                        view.render_line(glm::vec2(previous.get_x(), previous.get_y()), glm::vec2(current.get_x(), current.get_y()));
                         previous = current;
                     });
                 });
-                
-                track::color junction_color;
-                track::color junction_unselected_color;
-                if(colormap.find("junctions") != colormap.end())
-                {
-                    junction_color = colormap["junctions"];
-                }
-                else
-                {
-                    junction_color = colormap["default"];
-                }
-                if(colormap.find("junctions_unselected") != colormap.end())
-                {
-                    junction_unselected_color = colormap["junctions_unselected"];
-                }
-                else
-                {
-                    junction_unselected_color = colormap["default"];
-                }
-
 
                 std::for_each(track_data.get_junctions().begin()
                              ,track_data.get_junctions().end()
-                             ,[scale,track_data,junction_color,junction_unselected_color](const track::junction& j)
+                             ,[&view,scale,track_data](const track::junction& j)
                 {
                     int index = 0;
                     std::for_each(j.get_children().begin()
                                  ,j.get_children().end()
-                                 ,[scale,track_data,junction_color,junction_unselected_color,j,&index]
+                                 ,[&view,scale,track_data,j,&index]
                                   (const uint64_t& child)
                     {
-                        track::color current_color;
                         if(j.get_selected() != index++)
                         {
-                            current_color = junction_unselected_color;
+                            view.set_color("junctions_unselected");
                         }
                         else
                         {
-                            current_color = junction_color;
+                            view.set_color("junctions");
                         }
                     
                         if( (j.get_parent() < track_data.get_points().size())
@@ -256,12 +193,7 @@ int main(int argc, char** argv)
                         {
                             track::point p = track_data.get_points()[j.get_parent()];
                             track::point c = track_data.get_points()[child];
-                            glLineWidth(2.5 * scale);
-                            glBegin(GL_LINES);
-                            glColor3ub(current_color.get_red(), current_color.get_green(), current_color.get_blue());
-                            glVertex2f(p.get_x(),p.get_y());
-                            glVertex2f(c.get_x(),c.get_y());
-                            glEnd();
+                            view.render_line(glm::vec2(p.get_x(),p.get_y()), glm::vec2(c.get_x(),c.get_y()));
                         }
                     });
                 });
@@ -283,19 +215,17 @@ int main(int argc, char** argv)
                 
                 // end render data
                 
-                SDL_GL_SwapWindow(p_window);
+                view.per_frame_finish();
                 
                 SDL_Delay(10);
             }
-
-            //SDL_DestroyRenderer(p_renderer);
-            SDL_DestroyWindow(p_window);
+            
             SDL_Quit();
         
         }
         else
         {
-            SDL_Log("Error: %s\n", SDL_GetError());
+            SDL_Log("Error: %s, %s\n", SDL_GetError(), view.get_error());
         }
     }
     else
