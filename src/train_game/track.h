@@ -9,6 +9,7 @@
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_image.h>
 #include <train_game/I_view.h>
+#include <track_data.h>
 
 namespace train_game
 {
@@ -35,6 +36,10 @@ public:
     
     /// copy constructor
     track(const track& other);
+    
+    static track from_bezier(glm::vec2 start, glm::vec2 end, std::vector<glm::vec2> control_points, uint32_t segments = 4);
+    
+    static std::vector<track> from_quicktype(track_quicktype::track_data& data);
 
     /// Removes class value
     virtual ~track();

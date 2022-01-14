@@ -19,6 +19,7 @@ public:
     virtual ~OpenGl_view();
     
     void set_scale(float scale);
+    void move_center(float dx, float dy);
     
     virtual void per_frame_init();
     virtual void per_frame_finish();

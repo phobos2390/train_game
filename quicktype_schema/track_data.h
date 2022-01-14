@@ -14,7 +14,7 @@
 #include <stdexcept>
 #include <regex>
 
-namespace track {
+namespace track_quicktype {
     using nlohmann::json;
 
     inline json get_untyped(const json & j, const char * property) {
@@ -150,29 +150,29 @@ namespace track {
 }
 
 namespace nlohmann {
-    void from_json(const json & j, track::color & x);
-    void to_json(json & j, const track::color & x);
+    void from_json(const json & j, track_quicktype::color & x);
+    void to_json(json & j, const track_quicktype::color & x);
 
-    void from_json(const json & j, track::junction & x);
-    void to_json(json & j, const track::junction & x);
+    void from_json(const json & j, track_quicktype::junction & x);
+    void to_json(json & j, const track_quicktype::junction & x);
 
-    void from_json(const json & j, track::point & x);
-    void to_json(json & j, const track::point & x);
+    void from_json(const json & j, track_quicktype::point & x);
+    void to_json(json & j, const track_quicktype::point & x);
 
-    void from_json(const json & j, track::track & x);
-    void to_json(json & j, const track::track & x);
+    void from_json(const json & j, track_quicktype::track & x);
+    void to_json(json & j, const track_quicktype::track & x);
 
-    void from_json(const json & j, track::track_data & x);
-    void to_json(json & j, const track::track_data & x);
+    void from_json(const json & j, track_quicktype::track_data & x);
+    void to_json(json & j, const track_quicktype::track_data & x);
 
-    inline void from_json(const json & j, track::color& x) {
+    inline void from_json(const json & j, track_quicktype::color& x) {
         x.set_blue(j.at("blue").get<int64_t>());
         x.set_green(j.at("green").get<int64_t>());
         x.set_id(j.at("id").get<std::string>());
         x.set_red(j.at("red").get<int64_t>());
     }
 
-    inline void to_json(json & j, const track::color & x) {
+    inline void to_json(json & j, const track_quicktype::color & x) {
         j = json::object();
         j["blue"] = x.get_blue();
         j["green"] = x.get_green();
@@ -180,48 +180,48 @@ namespace nlohmann {
         j["red"] = x.get_red();
     }
 
-    inline void from_json(const json & j, track::junction& x) {
+    inline void from_json(const json & j, track_quicktype::junction& x) {
         x.set_children(j.at("children").get<std::vector<int64_t>>());
         x.set_parent(j.at("parent").get<int64_t>());
         x.set_selected(j.at("selected").get<int64_t>());
     }
 
-    inline void to_json(json & j, const track::junction & x) {
+    inline void to_json(json & j, const track_quicktype::junction & x) {
         j = json::object();
         j["children"] = x.get_children();
         j["parent"] = x.get_parent();
         j["selected"] = x.get_selected();
     }
 
-    inline void from_json(const json & j, track::point& x) {
+    inline void from_json(const json & j, track_quicktype::point& x) {
         x.set_x(j.at("x").get<int64_t>());
         x.set_y(j.at("y").get<int64_t>());
     }
 
-    inline void to_json(json & j, const track::point & x) {
+    inline void to_json(json & j, const track_quicktype::point & x) {
         j = json::object();
         j["x"] = x.get_x();
         j["y"] = x.get_y();
     }
 
-    inline void from_json(const json & j, track::track& x) {
+    inline void from_json(const json & j, track_quicktype::track& x) {
         x.set_points(j.at("points").get<std::vector<int64_t>>());
     }
 
-    inline void to_json(json & j, const track::track & x) {
+    inline void to_json(json & j, const track_quicktype::track & x) {
         j = json::object();
         j["points"] = x.get_points();
     }
 
-    inline void from_json(const json & j, track::track_data& x) {
-        x.set_colors(j.at("colors").get<std::vector<track::color>>());
-        x.set_junctions(j.at("junctions").get<std::vector<track::junction>>());
-        x.set_points(j.at("points").get<std::vector<track::point>>());
-        x.set_tracks(j.at("tracks").get<std::vector<track::track>>());
+    inline void from_json(const json & j, track_quicktype::track_data& x) {
+        x.set_colors(j.at("colors").get<std::vector<track_quicktype::color>>());
+        x.set_junctions(j.at("junctions").get<std::vector<track_quicktype::junction>>());
+        x.set_points(j.at("points").get<std::vector<track_quicktype::point>>());
+        x.set_tracks(j.at("tracks").get<std::vector<track_quicktype::track>>());
         x.set_version(j.at("version").get<std::string>());
     }
 
-    inline void to_json(json & j, const track::track_data & x) {
+    inline void to_json(json & j, const track_quicktype::track_data & x) {
         j = json::object();
         j["colors"] = x.get_colors();
         j["junctions"] = x.get_junctions();

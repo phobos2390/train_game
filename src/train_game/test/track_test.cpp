@@ -67,6 +67,79 @@ TEST_CASE("render_test", "basic_track_render_test")
     SDL_FreeSurface(p_surface);
 }
 
+TEST_CASE("render_test.from_bezier_test", "render_test.from_bezier_test")
+{    
+    SDL_Surface * p_surface = SDL_CreateRGBSurface( 0
+                                                  , 100
+                                                  , 100
+                                                  , 0x20
+                                                  , 0x00FF0000
+                                                  , 0x0000FF00
+                                                  , 0x000000FF
+                                                  , 0xFF000000);
+
+    if(p_surface == NULL)
+    {
+        SDL_Log("Surface undefined %s", SDL_GetError());
+        REQUIRE(false);
+    }
+    SDL_Renderer* p_renderer = SDL_CreateSoftwareRenderer(p_surface);
+    if(p_renderer == NULL)
+    {
+        SDL_Log("Renderer undefined %s", SDL_GetError());
+        REQUIRE(false);
+    }
+    SDL_Texture* p_texture = SDL_CreateTextureFromSurface(p_renderer, p_surface);
+    if(p_texture == NULL)
+    {
+        SDL_Log("Texture undefined %s", SDL_GetError());
+        REQUIRE(false);
+    }
+    
+    SDL_SetRenderDrawColor(p_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(p_renderer);
+
+    SDL_SetRenderDrawColor(p_renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    
+    SDLRender_view view(p_renderer);
+    
+    glm::vec2 start (40, 30);
+    glm::vec2 end (60, 70);
+    std::vector<glm::vec2> c;
+    c.emplace_back(40,55);
+    c.emplace_back(60,45);
+    
+    track t = track::from_bezier(start, end, c, 4);
+    
+    glm::vec2 start2 (60, 30);
+    glm::vec2 end2 (40, 70);
+    std::vector<glm::vec2> c2;
+    c2.emplace_back(60,55);
+    c2.emplace_back(40,45);
+    
+    track t2 = track::from_bezier(start2,end2,c2,4);
+    
+    track t3;
+    t3.add_point(glm::vec2(40, 30));
+    t3.add_point(glm::vec2(40, 70));
+    
+    track t4;
+    t4.add_point(glm::vec2(60, 30));
+    t4.add_point(glm::vec2(60, 70));
+    
+    t.render(view);
+    t2.render(view);
+    t3.render(view);
+    t4.render(view);
+
+    SDL_RenderPresent(p_renderer);
+    IMG_SavePNG(p_surface, "test_files/from_bezier_test.png");
+    
+    SDL_DestroyRenderer(p_renderer);
+    SDL_DestroyTexture(p_texture);
+    SDL_FreeSurface(p_surface);
+}
+
 TEST_CASE("render_test.basic_track_split_test", "render_test.basic_track_split_test")
 {    
     SDL_Surface * p_surface = SDL_CreateRGBSurface( 0

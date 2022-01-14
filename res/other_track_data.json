@@ -112,6 +112,7 @@
   [
     { "id":"junctions", "red": 255, "green": 255, "blue": 0 },
     { "id":"junctions_unselected", "red": 128, "green": 128, "blue": 128 },
+    { "id":"locomotives", "red": 255, "green": 200, "blue": 32 },
     { "id":"tracks", "red": 200, "green": 200, "blue": 200 },
     { "id":"default", "red": 128, "green": 128, "blue": 128 }
   ],

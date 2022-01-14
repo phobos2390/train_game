@@ -12,6 +12,7 @@
 #include <nlohmann/json.hpp>
 #include <train_game/line_utils.h>
 #include <train_game/OpenGl_view.h>
+#include <train_game/locomotive.h>
 #include <track_data.h>
 #include <fstream>
 #include <vector>
@@ -85,7 +86,7 @@ int main(int argc, char** argv)
 //    float height = 500;
 //    float width = 500;
     
-    float scale = 2.0;
+    float scale = 1.0;
     
     if (argc > 1)
     {
@@ -103,6 +104,8 @@ int main(int argc, char** argv)
         
         train_game::OpenGl_view view("Loading test");
 
+        uint16_t loco_orientation = 0;
+                
         if(view.get_error() == 0)
         {
             SDL_Event event;
@@ -113,15 +116,15 @@ int main(int argc, char** argv)
             bool continuing = true;
                         
             nlohmann::json j;
-            track::track_data track_data;
-            std::map<std::string, track::color> colormap;
+            track_quicktype::track_data track_data;
+            std::map<std::string, track_quicktype::color> colormap;
             try
             {
                 file_input >> j;
                 nlohmann::from_json(j, track_data);
                 std::for_each(track_data.get_colors().begin()
                              ,track_data.get_colors().end()
-                             ,[&view,&colormap](const track::color& c)
+                             ,[&view,&colormap](const track_quicktype::color& c)
                 {
                     view.set_color(c.get_id(),c.get_red(),c.get_green(),c.get_blue());
                 });
@@ -147,6 +150,25 @@ int main(int argc, char** argv)
                         printf("SDL_QUIT\n");
                         continuing = false;
                     }
+                    else if(event.type == SDL_MOUSEWHEEL)
+                    {
+                        scale -= event.button.x / 10.0;
+                        if(scale < 0.1)
+                        {
+                            scale = 0.1;
+                        }
+                        if(scale > 10.0)
+                        {
+                            scale = 10.0;
+                        }
+                        view.set_scale(scale);
+                    }
+                    else if( (event.type == SDL_MOUSEMOTION)
+                          && (SDL_BUTTON_LEFT == (SDL_GetMouseState(0,0) & SDL_BUTTON_LEFT)))
+                    {
+                        
+                        view.move_center(event.motion.xrel, event.motion.yrel);
+                    }
                 }
                 
                 view.per_frame_init();
@@ -155,14 +177,14 @@ int main(int argc, char** argv)
 
                 std::for_each(track_data.get_tracks().begin()
                              ,track_data.get_tracks().end()
-                             ,[&view, scale, track_data](const track::track& t)
+                             ,[&view, scale, track_data](const track_quicktype::track& t)
                 {
-                    track::point previous = track_data.get_points()[t.get_points().front()];
+                    track_quicktype::point previous = track_data.get_points()[t.get_points().front()];
                     std::for_each( t.get_points().begin()
                                  , t.get_points().end()
                                  , [&view, scale, track_data,&previous](const uint64_t& index)
                     {
-                        track::point current = track_data.get_points()[index];
+                        track_quicktype::point current = track_data.get_points()[index];
                         view.set_color("tracks");
                         view.render_line(glm::vec2(previous.get_x(), previous.get_y()), glm::vec2(current.get_x(), current.get_y()));
                         previous = current;
@@ -171,7 +193,7 @@ int main(int argc, char** argv)
 
                 std::for_each(track_data.get_junctions().begin()
                              ,track_data.get_junctions().end()
-                             ,[&view,scale,track_data](const track::junction& j)
+                             ,[&view,scale,track_data](const track_quicktype::junction& j)
                 {
                     int index = 0;
                     std::for_each(j.get_children().begin()
@@ -191,21 +213,41 @@ int main(int argc, char** argv)
                         if( (j.get_parent() < track_data.get_points().size())
                          && (child < track_data.get_points().size()))
                         {
-                            track::point p = track_data.get_points()[j.get_parent()];
-                            track::point c = track_data.get_points()[child];
+                            track_quicktype::point p = track_data.get_points()[j.get_parent()];
+                            track_quicktype::point c = track_data.get_points()[child];
                             view.render_line(glm::vec2(p.get_x(),p.get_y()), glm::vec2(c.get_x(),c.get_y()));
                         }
                     });
                 });
                 
+                train_game::locomotive loco;
+                
+                glm::vec2 loco_pos(170, 250);
+                loco.set_position(loco_pos);
+                loco.set_orientation(loco_orientation);
+                //loco_orientation += 0x10000/0x168; // d360 == x168
+                
+//                glm::vec2 pos_front(0,10);
+//                glm::vec2 pos_back_1(-4,-10);
+//                glm::vec2 pos_back_2(4,-10);
+//                
+//                std::vector<glm::vec2> locomotive_polygon;
+//                locomotive_polygon.push_back(loco_pos + pos_front);
+//                locomotive_polygon.push_back(loco_pos + pos_back_1);
+//                locomotive_polygon.push_back(loco_pos + pos_back_2);
+                
+//                view.set_color("locomotives");
+                loco.render(view);
+//                view.render_polygon(locomotive_polygon);
+                
                 //1.0/2.0 - 1.0/16.0
                 
                 glm::vec2 start (190, 370);
-                glm::vec2 end (225, 415);
-                glm::vec2 c1 (185,395);
-                glm::vec2 c2 (185,395);
+                glm::vec2 end (215, 405);
+                glm::vec2 c1 (197,397);
+                glm::vec2 c2 (197,397);
                 
-                render_bezier(start, end, c1, c2, 5, verbose);
+                render_bezier(start, end, c1, c2, 4, verbose);
                 
                 render_arc(-1.0/8.0, 0, 16, 390, 150, 100, verbose);
 //                render_arc(3.0/8.0,       0, 16, 390, 150, 100, verbose);

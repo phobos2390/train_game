@@ -29,6 +29,8 @@ struct OpenGl_view::Impl
 public:
     SDL_Window* m_p_window;
     float m_scale;
+    float m_line_thickness;
+    glm::vec2 m_center;
     int32_t m_error;
     SDL_GLContext m_p_gl_context;
     uint32_t m_height;
@@ -38,7 +40,9 @@ public:
     
     Impl(std::string window_name)
         : m_p_window(NULL)
-        , m_scale(2.0)
+        , m_scale(1.0)
+        , m_line_thickness(2)
+        , m_center(250,250)
         , m_error(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER))
         , m_p_gl_context(0)
         , m_height(500)
@@ -51,8 +55,8 @@ public:
             m_p_window = SDL_CreateWindow( window_name.c_str()
                                          , SDL_WINDOWPOS_UNDEFINED
                                          , SDL_WINDOWPOS_UNDEFINED
-                                         , m_height * m_scale
-                                         , m_width * m_scale
+                                         , m_height * 2.0
+                                         , m_width * 2.0
                                          , SDL_WINDOW_OPENGL);
 
             m_p_gl_context = SDL_GL_CreateContext(m_p_window);
@@ -69,6 +73,17 @@ public:
         }
     }
     
+    void set_transform()
+    {
+        float width = m_width * m_scale;
+        float height = m_height * m_scale;
+        glLoadIdentity();
+        //glTranslatef(-width/2,height/2,0);
+        glScalef(1.0f/width,1.0f/-height,1.0);
+        glTranslatef(-m_center.x, -m_center.y,0);
+        //glTranslatef(-width/2.0,-height/2.0,0);
+    }
+
     void ensure_color(const std::string& alias, const color_t& color)
     {
         if(m_colormap.find(alias) == m_colormap.end())
@@ -111,14 +126,7 @@ void OpenGl_view::per_frame_init()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
             GL_ACCUM_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    glLoadIdentity();
-//    glScalef(2.0f/(m_p_impl->m_scale*m_p_impl->m_width),2.0f/-(m_p_impl->m_scale*m_p_impl->m_height),1.0);
-    glScalef(2.0f/(m_p_impl->m_width),2.0f/-(m_p_impl->m_height),1.0);
-//    glScalef(m_p_impl->m_scale*2.0f/(m_p_impl->m_width),m_p_impl->m_scale*2.0f/-(m_p_impl->m_height),1.0);
-//    glTranslatef(-(m_p_impl->m_scale*m_p_impl->m_width)/2.0,-(m_p_impl->m_scale*m_p_impl->m_height)/2.0,0);
-//    glScalef(2.0f/(m_p_impl->m_width),2.0f/-(m_p_impl->m_height),1.0);
-    glTranslatef(-(m_p_impl->m_width)/2.0,-(m_p_impl->m_height)/2.0,0);
-//    glTranslatef(-(m_p_impl->m_width)/(m_p_impl->m_scale*2.0),-(m_p_impl->m_height)/(m_p_impl->m_scale*2.0),0);
+    m_p_impl->set_transform();
 }
 
 void OpenGl_view::per_frame_finish()
@@ -128,6 +136,7 @@ void OpenGl_view::per_frame_finish()
 
 void OpenGl_view::render_line(glm::vec2 start, glm::vec2 end)
 {
+    glLineWidth(m_p_impl->m_line_thickness / m_p_impl->m_scale);
     glBegin(GL_LINES);
     color_t c = m_p_impl->m_current_color;
     glColor3ub(c.m_red, c.m_green, c.m_blue);
@@ -167,6 +176,12 @@ void OpenGl_view::set_color(std::string alias, uint8_t red, uint8_t green, uint8
 void OpenGl_view::set_scale(float scale)
 {
     m_p_impl->m_scale = scale;
+}
+
+void OpenGl_view::move_center(float dx, float dy)
+{
+    m_p_impl->m_center.x -= dx*m_p_impl->m_scale;
+    m_p_impl->m_center.y -= dy*m_p_impl->m_scale;
 }
 
 int32_t OpenGl_view::get_error()
