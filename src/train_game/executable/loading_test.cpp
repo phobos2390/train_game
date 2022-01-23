@@ -13,6 +13,8 @@
 #include <train_game/line_utils.h>
 #include <train_game/OpenGl_view.h>
 #include <train_game/locomotive.h>
+#include <train_game/track.h>
+#include <train_game/junction.h>
 #include <track_data.h>
 #include <fstream>
 #include <vector>
@@ -118,6 +120,17 @@ int main(int argc, char** argv)
             nlohmann::json j;
             track_quicktype::track_data track_data;
             std::map<std::string, track_quicktype::color> colormap;
+            
+            std::vector<train_game::track> m_tracks;
+            std::vector<train_game::junction> m_junctions;
+            
+            std::vector<glm::vec2> mouse_shadow;
+            mouse_shadow.push_back(glm::vec2(-5,0));
+            mouse_shadow.push_back(glm::vec2(0,-5));
+            mouse_shadow.push_back(glm::vec2(5,0));
+            mouse_shadow.push_back(glm::vec2(0,5));
+            mouse_shadow.push_back(glm::vec2(-5,0));
+
             try
             {
                 file_input >> j;
@@ -128,6 +141,8 @@ int main(int argc, char** argv)
                 {
                     view.set_color(c.get_id(),c.get_red(),c.get_green(),c.get_blue());
                 });
+                m_tracks = train_game::track::from_quicktype(track_data);
+                m_junctions = train_game::junction::from_quicktype(track_data);
             }
             catch(std::exception& e)
             {
@@ -174,86 +189,35 @@ int main(int argc, char** argv)
                 view.per_frame_init();
                 
                 // render data
-
-                std::for_each(track_data.get_tracks().begin()
-                             ,track_data.get_tracks().end()
-                             ,[&view, scale, track_data](const track_quicktype::track& t)
-                {
-                    track_quicktype::point previous = track_data.get_points()[t.get_points().front()];
-                    std::for_each( t.get_points().begin()
-                                 , t.get_points().end()
-                                 , [&view, scale, track_data,&previous](const uint64_t& index)
-                    {
-                        track_quicktype::point current = track_data.get_points()[index];
-                        view.set_color("tracks");
-                        view.render_line(glm::vec2(previous.get_x(), previous.get_y()), glm::vec2(current.get_x(), current.get_y()));
-                        previous = current;
-                    });
-                });
-
-                std::for_each(track_data.get_junctions().begin()
-                             ,track_data.get_junctions().end()
-                             ,[&view,scale,track_data](const track_quicktype::junction& j)
-                {
-                    int index = 0;
-                    std::for_each(j.get_children().begin()
-                                 ,j.get_children().end()
-                                 ,[&view,scale,track_data,j,&index]
-                                  (const uint64_t& child)
-                    {
-                        if(j.get_selected() != index++)
-                        {
-                            view.set_color("junctions_unselected");
-                        }
-                        else
-                        {
-                            view.set_color("junctions");
-                        }
-                    
-                        if( (j.get_parent() < track_data.get_points().size())
-                         && (child < track_data.get_points().size()))
-                        {
-                            track_quicktype::point p = track_data.get_points()[j.get_parent()];
-                            track_quicktype::point c = track_data.get_points()[child];
-                            view.render_line(glm::vec2(p.get_x(),p.get_y()), glm::vec2(c.get_x(),c.get_y()));
-                        }
-                    });
-                });
                 
+                int32_t x = 0;
+                int32_t y = 0;
+                SDL_GetMouseState(&x, &y);
+                glm::vec2 point(x,y);
+
+                std::for_each( m_tracks.begin()
+                             , m_tracks.end()
+                             , [&view](train_game::track& track)
+                {
+                    track.render(view);
+                });
+
+                std::for_each( m_junctions.begin()
+                             , m_junctions.end()
+                             , [&view](train_game::junction& junct)
+                {
+                    junct.render(view);
+                });
+
                 train_game::locomotive loco;
                 
                 glm::vec2 loco_pos(170, 250);
                 loco.set_position(loco_pos);
                 loco.set_orientation(loco_orientation);
-                //loco_orientation += 0x10000/0x168; // d360 == x168
-                
-//                glm::vec2 pos_front(0,10);
-//                glm::vec2 pos_back_1(-4,-10);
-//                glm::vec2 pos_back_2(4,-10);
-//                
-//                std::vector<glm::vec2> locomotive_polygon;
-//                locomotive_polygon.push_back(loco_pos + pos_front);
-//                locomotive_polygon.push_back(loco_pos + pos_back_1);
-//                locomotive_polygon.push_back(loco_pos + pos_back_2);
-                
-//                view.set_color("locomotives");
                 loco.render(view);
-//                view.render_polygon(locomotive_polygon);
                 
-                //1.0/2.0 - 1.0/16.0
-                
-                glm::vec2 start (190, 370);
-                glm::vec2 end (215, 405);
-                glm::vec2 c1 (197,397);
-                glm::vec2 c2 (197,397);
-                
-                render_bezier(start, end, c1, c2, 4, verbose);
-                
-                render_arc(-1.0/8.0, 0, 16, 390, 150, 100, verbose);
-//                render_arc(3.0/8.0,       0, 16, 390, 150, 100, verbose);
-//                render_arc(1.0/4.0, 1.0/2.0, 16, 390, 150, 100, verbose);
-//                render_arc(1.0/16.0, 1.0/2.0 - 1.0/16.0, 16, 390, 150, 100, verbose);
-                verbose = false;
+                view.set_color("default");
+                view.render_polygon(view.to_world_coord(point), mouse_shadow);
                 
                 // end render data
                 

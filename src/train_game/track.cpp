@@ -4,6 +4,7 @@
 #include <functional>
 #include <algorithm>
 #include <train_game/line_utils.h>
+#include <limits>
 
 namespace train_game
 {
@@ -121,6 +122,7 @@ void track::add_point(glm::vec2 point)
 
 void track::render(train_game::I_view& view)
 {
+    view.set_color("tracks");
     if(m_p_impl->m_points.size() > 0)
     {
         glm::vec2 prev = m_p_impl->m_points.front();
@@ -177,5 +179,23 @@ bool track::intersect_split(glm_line2& line, std::vector<track>& other)
         m_p_impl->m_points.assign(first.begin(), first.end());
     }
     return is_intersecting;
+}
+
+float track::closest_distance_squared(glm::vec2& check_point)
+{
+    float minimum = std::numeric_limits<float>::infinity();
+    glm::vec2 previous = m_p_impl->m_points.front();
+    std::for_each(m_p_impl->m_points.begin()
+                 ,m_p_impl->m_points.end()
+                 ,[check_point,&previous,&minimum](const glm::vec2& current)
+    {
+        float dist_sqr = train_game::utils::distance_square(previous, current, check_point);
+        if(dist_sqr < minimum)
+        {
+            minimum = dist_sqr;
+        }
+        previous = current;
+    });
+    return minimum;
 }
 }

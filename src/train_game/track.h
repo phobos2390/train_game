@@ -50,6 +50,8 @@ public:
     
     bool intersect_split(glm_line2& line, std::vector<track>& other_tracks);
     
+    float closest_distance_squared(glm::vec2& check_point);
+    
 private:
     struct Impl;
     std::unique_ptr<Impl> m_p_impl;

@@ -3,6 +3,7 @@
 #include <train_game/OpenGl_view.h>
 #include <sdl2/SDL.h>
 #include <sdl2/SDL_opengl.h>
+#include <sdl2/SDL_ttf.h>
 #include <algorithm>
 #include <map>
 
@@ -28,6 +29,7 @@ struct OpenGl_view::Impl
 {
 public:
     SDL_Window* m_p_window;
+    float m_window_scale;
     float m_scale;
     float m_line_thickness;
     glm::vec2 m_center;
@@ -40,6 +42,7 @@ public:
     
     Impl(std::string window_name)
         : m_p_window(NULL)
+        , m_window_scale(2.0)
         , m_scale(1.0)
         , m_line_thickness(2)
         , m_center(250,250)
@@ -55,11 +58,12 @@ public:
             m_p_window = SDL_CreateWindow( window_name.c_str()
                                          , SDL_WINDOWPOS_UNDEFINED
                                          , SDL_WINDOWPOS_UNDEFINED
-                                         , m_height * 2.0
-                                         , m_width * 2.0
+                                         , m_height * m_window_scale
+                                         , m_width * m_window_scale
                                          , SDL_WINDOW_OPENGL);
 
             m_p_gl_context = SDL_GL_CreateContext(m_p_window);
+            TTF_Init();
         }
         ensure_color("default", m_current_color);
     }
@@ -67,6 +71,7 @@ public:
     {
         if(m_error == 0)
         {
+            TTF_Quit();
             SDL_GL_DeleteContext(m_p_gl_context);
             SDL_DestroyWindow(m_p_window);
             SDL_Quit();
@@ -106,6 +111,50 @@ public:
             color = m_colormap[alias];
         }
         return color;
+    }
+    
+    int32_t init_font(std::string ttf_filename)
+    {
+//        TTF_Font *font = TTF_OpenFont(ttf_filename.c_str(), 40);
+//        if(!font) {
+//            printf("Unable to load font: '%s'!\n"
+//                   "SDL2_ttf Error: %s\n", ttf_filename.c_str(), TTF_GetError());
+//            return -1;
+//        }
+//
+//        SDL_Color textColor           = { 0x00, 0x00, 0x00, 0xFF };
+//        SDL_Color textBackgroundColor = { 0xFF, 0xFF, 0xFF, 0xFF };
+//        SDL_Texture *text = NULL;
+//        SDL_Rect textRect;
+//
+//        SDL_Surface *textSurface = TTF_RenderText_Shaded(font, "", textColor, textBackgroundColor);
+//        if(!textSurface) 
+//        {
+//            printf("Unable to render text surface!\n"
+//                   "SDL2_ttf Error: %s\n", TTF_GetError());
+//        }
+//        else
+//        {
+//            // Create texture from surface pixels
+//            text = SDL_CreateTextureFromSurface(renderer, textSurface);
+//            if(!text) 
+//            {
+//                printf("Unable to create texture from rendered text!\n"
+//                       "SDL2 Error: %s\n", SDL_GetError());
+//                return -2;
+//            }
+//
+//            // Get text dimensions
+//            textRect.w = textSurface->w;
+//            textRect.h = textSurface->h;
+//
+//            SDL_FreeSurface(textSurface);
+//        }
+//
+//        textRect.x = (SCREEN_WIDTH - textRect.w) / 2;
+//        textRect.y = squareRect.y - textRect.h - 10;
+//        return 0;
+        return -3;
     }
 };
 
@@ -159,6 +208,19 @@ void OpenGl_view::render_polygon(std::vector<glm::vec2>& points)
     glEnd();
 }
 
+void OpenGl_view::render_polygon(glm::vec2 center, std::vector<glm::vec2>& points)
+{
+    std::vector<glm::vec2> polygon_points;
+    std::transform(points.begin()
+                  ,points.end()
+                  ,std::back_inserter(polygon_points)
+                  ,[center](const glm::vec2& point)
+    {
+        return point + center;
+    });
+    render_polygon(polygon_points);
+}
+
 void OpenGl_view::set_color(std::string alias)
 {
     m_p_impl->m_current_color = m_p_impl->get_color(alias);
@@ -183,6 +245,14 @@ void OpenGl_view::move_center(float dx, float dy)
     m_p_impl->m_center.x -= dx*m_p_impl->m_scale;
     m_p_impl->m_center.y -= dy*m_p_impl->m_scale;
 }
+
+glm::vec2 OpenGl_view::to_world_coord(glm::vec2 window_coord)
+{
+    glm::vec2 c_w(m_p_impl->m_window_scale * m_p_impl->m_height, m_p_impl->m_window_scale * m_p_impl->m_width);
+    c_w = c_w / 2.0f;
+    return ((window_coord - c_w) * m_p_impl->m_scale) + m_p_impl->m_center;
+}
+
 
 int32_t OpenGl_view::get_error()
 {

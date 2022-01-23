@@ -20,6 +20,7 @@ public:
     
     void set_scale(float scale);
     void move_center(float dx, float dy);
+    glm::vec2 to_world_coord(glm::vec2 window_coord);
     
     virtual void per_frame_init();
     virtual void per_frame_finish();
@@ -29,6 +30,7 @@ public:
     virtual void render_line(glm::vec2 start, glm::vec2 end);
 
     virtual void render_polygon(std::vector<glm::vec2>& points);
+    void render_polygon(glm::vec2 center, std::vector<glm::vec2>& points);
 
     virtual void set_color(std::string alias);
     
